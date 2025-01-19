@@ -17,8 +17,6 @@ import {
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
-import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -30,6 +28,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { TeamSwitcher } from "@/components/ui/team-switcher";
+import { authClient } from "@/lib/auth-client";
+import { User } from "better-auth";
 
 const data = {
   user: {
@@ -173,6 +173,10 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const session = authClient.useSession();
+
+  const user = session?.data?.user;
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -185,13 +189,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        <NavMain />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      <SidebarFooter>{user && <NavUser user={user} />}</SidebarFooter>
     </Sidebar>
   );
 }

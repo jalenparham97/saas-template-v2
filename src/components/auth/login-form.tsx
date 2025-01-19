@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { DEFAULT_LOGIN_REDIRECT } from "@/lib/contants";
+import { APP_ROUTES, DEFAULT_LOGIN_REDIRECT } from "@/lib/contants";
 import { cn } from "@/lib/utils";
 import { LoginSchema } from "@/schemas/auth.schemas";
 import { type LoginFormData } from "@/types/auth.types";
@@ -50,7 +50,7 @@ export function LoginForm({
       callbackURL: DEFAULT_LOGIN_REDIRECT,
       fetchOptions: {
         onSuccess: () => {
-          router.push("/");
+          router.push(APP_ROUTES.DASHBOARD);
         },
         onError: (ctx) => {
           setErrorMessage(ctx.error.message);

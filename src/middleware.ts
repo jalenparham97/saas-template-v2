@@ -4,7 +4,6 @@ import {
   apiAuthPrefix,
   APP_ROUTES,
   authRoutes,
-  DEFAULT_LOGIN_REDIRECT,
   publicRoutes,
 } from "@/lib/contants";
 import { getBetterAuthSession } from "@/server/auth";
@@ -25,7 +24,7 @@ export default async function authMiddleware(request: NextRequest) {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(APP_ROUTES.DASHBOARD, nextUrl));
     }
     return;
   }
