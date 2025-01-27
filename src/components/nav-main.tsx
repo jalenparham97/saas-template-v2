@@ -8,31 +8,35 @@ import {
 } from "@/components/ui/sidebar";
 import { IconHome, IconSettings } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSelectedLayoutSegment } from "next/navigation";
 
 export function NavMain() {
+  const segment = useSelectedLayoutSegment();
   const pathname = usePathname();
-  const isRouteMatch = (route: string) => pathname === route;
+
+  function isActive(path: string, name: string) {
+    return segment === name.toLowerCase() || pathname === path;
+  }
 
   return (
     <SidebarGroup>
       <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild isActive={isRouteMatch("/dashboard")}>
-            <Link href="/dashboard">
-              <IconHome />
+        <Link href="/dashboard">
+          <SidebarMenuItem>
+            <SidebarMenuButton isActive={isActive("/dashboard", "dashboard")}>
+              <IconHome size={18} />
               <span>Dashboard</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild isActive={isRouteMatch("/settings")}>
-            <Link href="/settings">
-              <IconSettings />
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </Link>
+        <Link href="/settings">
+          <SidebarMenuItem>
+            <SidebarMenuButton isActive={isActive("/settings", "settings")}>
+              <IconSettings size={18} />
               <span>Settings</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </Link>
       </SidebarMenu>
     </SidebarGroup>
   );

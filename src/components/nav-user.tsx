@@ -8,7 +8,6 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,25 +23,31 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { APP_ROUTES } from "@/lib/contants";
 import { getInitials } from "@/utils/get-initials";
-import { type User } from "better-auth";
+import { useRouter } from "next/navigation";
 
-interface Props {
-  user: User;
-}
-
-export function NavUser({ user }: Props) {
-  const { isMobile } = useSidebar();
+export function NavUser() {
   const router = useRouter();
+  const session = authClient.useSession();
 
-  async function handleLogout() {
-    await authClient.signOut();
-    router.push(APP_ROUTES.LOGIN);
+  if (!session?.data?.user) {
+    return null;
   }
+
+  const user = session.data.user;
+
+  const handleLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push(APP_ROUTES.LOGIN);
+        },
+      },
+    });
+  };
 
   return (
     <SidebarMenu>
@@ -66,12 +71,7 @@ export function NavUser({ user }: Props) {
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
+          <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg">
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">

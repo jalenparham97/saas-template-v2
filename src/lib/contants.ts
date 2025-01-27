@@ -1,11 +1,10 @@
-export const DEFAULT_LOGIN_REDIRECT = "/";
-
-export const APP_NAME = "Acme Inc.";
+export const APP_NAME = "Acme Inc";
 
 export const APP_ROUTES = {
   LOGIN: "/auth/login",
   SIGN_UP: "/auth/signup",
   DASHBOARD: "/dashboard",
+  SETTINGS: "/settings",
 } as const;
 
 /**

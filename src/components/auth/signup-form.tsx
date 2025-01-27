@@ -1,11 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import GithubLogo from "@/assets/logos/github-logo.svg";
+import GoogleLogo from "@/assets/logos/google-logo.svg";
 import { AlertError } from "@/components/ui/alert-error";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +20,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
-import { DEFAULT_LOGIN_REDIRECT } from "@/lib/contants";
+import { authClient, signInWithProvider } from "@/lib/auth-client";
+import { APP_ROUTES } from "@/lib/contants";
 import { cn } from "@/lib/utils";
 import { SignupSchema } from "@/schemas/auth.schemas";
 import { type SignupFormData } from "@/types/auth.types";
@@ -49,16 +52,24 @@ export function SignupForm({
       name: data.name,
       email: data.email,
       password: data.password,
-      callbackURL: DEFAULT_LOGIN_REDIRECT,
+      callbackURL: APP_ROUTES.DASHBOARD,
       fetchOptions: {
         onSuccess: (ctx) => {
-          router.push("/");
+          router.push(APP_ROUTES.DASHBOARD);
         },
         onError: (ctx) => {
           setErrorMessage(ctx.error.message);
         },
       },
     });
+  }
+
+  async function handleGoogleLogin() {
+    await signInWithProvider("google");
+  }
+
+  async function handleGithubLogin() {
+    await signInWithProvider("github");
   }
 
   return (
@@ -75,19 +86,6 @@ export function SignupForm({
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-6">
-              {/* <div className="flex flex-col gap-4">
-                <Button variant="outline" className="w-full">
-                  Sign up with Apple
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Sign up with Google
-                </Button>
-              </div>
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="bg-background text-muted-foreground relative z-10 px-2">
-                  Or continue with
-                </span>
-              </div> */}
               <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Input
@@ -129,6 +127,46 @@ export function SignupForm({
                   Sign up
                 </Button>
               </div>
+
+              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+                <span className="relative z-10 bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  type="button"
+                  onClick={handleGithubLogin}
+                  leftIcon={
+                    <Image
+                      alt="Sign in with Github"
+                      src={GithubLogo}
+                      className="size-4"
+                    />
+                  }
+                >
+                  Login with GitHub
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  leftIcon={
+                    <Image
+                      alt="Sign in with Google"
+                      src={GoogleLogo}
+                      className="size-4"
+                    />
+                  }
+                >
+                  Login with Google
+                </Button>
+              </div>
+
               <div className="text-center text-sm">
                 Already have an account?{" "}
                 <Link
@@ -142,7 +180,7 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground [&_a]:hover:text-primary text-balance text-center text-xs [&_a]:underline [&_a]:underline-offset-4">
+      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </div>
