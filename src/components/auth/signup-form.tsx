@@ -148,7 +148,7 @@ export function SignupForm({
                     />
                   }
                 >
-                  Login with GitHub
+                  Sign up with GitHub
                 </Button>
                 <Button
                   variant="outline"
@@ -163,7 +163,7 @@ export function SignupForm({
                     />
                   }
                 >
-                  Login with Google
+                  Sign up with Google
                 </Button>
               </div>
 

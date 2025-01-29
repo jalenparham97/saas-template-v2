@@ -1,6 +1,7 @@
 import { type BetterAuthOptions } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { openAPI } from "better-auth/plugins";
+import { passkey } from "better-auth/plugins/passkey";
 
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -9,7 +10,7 @@ export const authConfig: BetterAuthOptions = {
   database: prismaAdapter(db, {
     provider: "postgresql",
   }),
-  plugins: [openAPI()],
+  plugins: [openAPI(), passkey()],
   session: {
     cookieCache: {
       enabled: true,
