@@ -6,6 +6,7 @@ import { PasskeyCreateDialog } from "@/components/settings/passkey-create-dialog
 import { SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
 import { useDialog } from "@/hooks/use-dialog";
@@ -25,6 +26,7 @@ import { parseUserAgent } from "@/utils/parse-user-agent";
 import {
   IconCircleCheck,
   IconKey,
+  IconPencil,
   IconPlus,
   IconServer,
   IconTrash,
@@ -72,7 +74,7 @@ export function SettingsSecurityView() {
   return (
     <div>
       {user.isLoading && (
-        <div className="flex items-center justify-center py-[300px] sm:py-[400px]">
+        <div className="flex items-center justify-center py-[300px]">
           <Loader />
         </div>
       )}
@@ -91,6 +93,12 @@ export function SettingsSecurityView() {
             </div>
 
             <Card className="divide-y divide-gray-200 md:col-span-2">
+              <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar p-4">
+                <p className="text-base font-medium leading-6">
+                  Your connected accounts
+                </p>
+              </div>
+
               <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
                   <Image src={GithubLogo} alt="alt" className="size-7" />
@@ -160,11 +168,20 @@ export function SettingsSecurityView() {
                   </Button>
                 </div>
                 <div>
-                  {user.data?.passkeys && (
+                  {user.data?.passkeys && user.data?.passkeys.length > 0 && (
                     <div className="divide-y divide-gray-200">
                       {user.data?.passkeys.map((passkey) => (
                         <Passkey key={passkey.id} passkey={passkey} />
                       ))}
+                    </div>
+                  )}
+                  {user.data?.passkeys?.length === 0 && (
+                    <div className="py-12">
+                      <EmptyState
+                        icon={<IconKey className="size-8" />}
+                        title="No Passkeys"
+                        subtitle="Add a passkey to login more securely"
+                      />
                     </div>
                   )}
                 </div>
@@ -297,12 +314,22 @@ function Session({
 function Passkey({ passkey }: { passkey: Passkey }) {
   const apiUtils = api.useUtils();
 
+  const updatePasskeyMutation = api.user.updatePasskeyName.useMutation({
+    onSuccess: async () => {
+      await apiUtils.user.getUser.invalidate();
+    },
+  });
+
   const deletePasskeyMutation = useMutation({
     mutationFn: removePasskey,
     onSuccess: async () => {
       await apiUtils.user.getUser.invalidate();
     },
   });
+
+  async function updatePasskeyName(name: string) {
+    await updatePasskeyMutation.mutateAsync({ id: passkey.id, name });
+  }
 
   async function deletePasskey() {
     await deletePasskeyMutation.mutateAsync(passkey.id);
@@ -324,14 +351,24 @@ function Passkey({ passkey }: { passkey: Passkey }) {
             </div> */}
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={deletePasskey}
-          loading={deletePasskeyMutation.isPending}
-        >
-          <IconTrash className="h-4 w-4 text-red-500" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={deletePasskey}
+            loading={deletePasskeyMutation.isPending}
+          >
+            <IconPencil className="size-5" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={deletePasskey}
+            loading={deletePasskeyMutation.isPending}
+          >
+            <IconTrash className="size-5 text-red-500" />
+          </Button>
+        </div>
       </div>
     </div>
   );

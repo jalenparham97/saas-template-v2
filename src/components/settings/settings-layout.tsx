@@ -8,7 +8,7 @@ export function SettingsLayout({ children }: { children: React.ReactNode }) {
       <PageTitle>Settings</PageTitle>
 
       <main className="mt-8">
-        <div className="overflow-x-scroll border-b border-gray-200 pb-2 sm:overflow-x-auto">
+        <div className="overflow-x-scroll border-b border-gray-200 pb-4 sm:overflow-x-auto">
           <div className="flex items-center space-x-2">
             <NavButton href={`/settings`}>General</NavButton>
             <NavButton href={`/settings/security`}>Security</NavButton>

@@ -56,4 +56,14 @@ export const userRouter = createTRPCRouter({
       },
     });
   }),
+  updatePasskeyName: protectedProcedure
+    .input(z.object({ id: z.string(), name: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const passkey = await ctx.db.passkey.update({
+        where: { id: input.id },
+        data: { name: input.name },
+      });
+
+      return passkey;
+    }),
 });
