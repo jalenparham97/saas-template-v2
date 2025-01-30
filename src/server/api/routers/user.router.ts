@@ -14,6 +14,7 @@ export const userRouter = createTRPCRouter({
             providerId: true,
           },
         },
+        passkeys: true,
         sessions: true,
       },
     });
@@ -30,6 +31,11 @@ export const userRouter = createTRPCRouter({
     }),
   revokeOtherSessions: protectedProcedure.mutation(async ({ ctx }) => {
     return await auth.api.revokeOtherSessions({
+      headers: ctx.headers,
+    });
+  }),
+  revokeAllSessions: protectedProcedure.mutation(async ({ ctx }) => {
+    return await auth.api.revokeSessions({
       headers: ctx.headers,
     });
   }),

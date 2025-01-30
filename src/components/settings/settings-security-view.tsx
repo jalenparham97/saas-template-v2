@@ -2,29 +2,39 @@
 
 import GithubLogo from "@/assets/logos/github-logo.svg";
 import GoogleLogo from "@/assets/logos/google-logo.svg";
+import { PasskeyCreateDialog } from "@/components/settings/passkey-create-dialog";
 import { SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
+import { useDialog } from "@/hooks/use-dialog";
 import {
   authClient,
   type AuthProvider,
   linkSocialProvider,
+  removePasskey,
 } from "@/lib/auth-client";
 import { capitalizeFirstLetter } from "@/lib/capitalize-first-letter";
 import { APP_NAME, APP_ROUTES } from "@/lib/contants";
 import { dayjs } from "@/lib/dayjs";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { type UserSession } from "@/types/auth.types";
+import { type Passkey, type Session } from "@/types/auth.types";
 import { parseUserAgent } from "@/utils/parse-user-agent";
-import { IconCircleCheck, IconServer } from "@tabler/icons-react";
+import {
+  IconCircleCheck,
+  IconKey,
+  IconPlus,
+  IconServer,
+  IconTrash,
+} from "@tabler/icons-react";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { isEmpty } from "radash";
 
 export function SettingsSecurityView() {
+  const [openPasskeyDialog, openPasskeyDialogHandlers] = useDialog();
   const user = api.user.getUser.useQuery();
   const currentSession = api.user.getActiveSession.useQuery();
   const apiUtils = api.useUtils();
@@ -45,21 +55,19 @@ export function SettingsSecurityView() {
     (session) => session.id === currentSession?.data?.session?.id,
   );
 
-  const revokeOtherSessionsMutation = api.user.revokeOtherSessions.useMutation({
+  const revokeAllSessionsMutaion = api.user.revokeAllSessions.useMutation({
     onSuccess: async () => {
       await apiUtils.user.getUser.invalidate();
     },
   });
 
-  async function handleRevokeOtherSessions() {
-    await revokeOtherSessionsMutation.mutateAsync();
+  async function revokeAllSessions() {
+    await revokeAllSessionsMutaion.mutateAsync();
   }
 
-  async function handleLinkSocialProvider(provider: AuthProvider) {
+  async function connectSocialProvider(provider: AuthProvider) {
     await linkSocialProvider(provider, `${APP_ROUTES.SETTINGS}/security`);
   }
-
-  const hasOtherSessions = !isEmpty(otherSessions);
 
   return (
     <div>
@@ -96,7 +104,7 @@ export function SettingsSecurityView() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => handleLinkSocialProvider("github")}
+                      onClick={() => connectSocialProvider("github")}
                     >
                       Connect
                     </Button>
@@ -116,7 +124,7 @@ export function SettingsSecurityView() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => handleLinkSocialProvider("google")}
+                      onClick={() => connectSocialProvider("google")}
                     >
                       Connect
                     </Button>
@@ -124,6 +132,44 @@ export function SettingsSecurityView() {
                 </div>
               </div>
             </Card>
+          </SettingsSection>
+
+          <Separator className="my-6" />
+
+          <SettingsSection>
+            <div>
+              <h2 className="text-base font-semibold leading-7">Passkeys</h2>
+              <p className="mt-1 text-sm leading-6 text-gray-500">
+                Use passkeys as an easier and more secure alternative to
+                passwords.
+              </p>
+            </div>
+
+            <div className="md:col-span-2">
+              <Card>
+                <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar p-4">
+                  <p className="text-base font-medium leading-6">
+                    Your passkeys
+                  </p>
+                  <Button
+                    variant="outline"
+                    leftIcon={<IconPlus size={16} />}
+                    onClick={openPasskeyDialogHandlers.open}
+                  >
+                    Add a passkey
+                  </Button>
+                </div>
+                <div>
+                  {user.data?.passkeys && (
+                    <div className="divide-y divide-gray-200">
+                      {user.data?.passkeys.map((passkey) => (
+                        <Passkey key={passkey.id} passkey={passkey} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
           </SettingsSection>
 
           <Separator className="my-6" />
@@ -138,40 +184,40 @@ export function SettingsSecurityView() {
             </div>
 
             <div className="md:col-span-2">
-              {currentUserSession && (
-                <>
-                  <div className="space-y-4">
+              <Card>
+                <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar p-4">
+                  <p className="text-base font-medium leading-6">
+                    Your sessions
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={revokeAllSessions}
+                    loading={revokeAllSessionsMutaion.isPending}
+                  >
+                    Sign out all sessions
+                  </Button>
+                </div>
+
+                {currentUserSession && (
+                  <div className="divide-y divide-gray-200">
                     {currentUserSession && (
                       <Session session={currentUserSession} isCurrentSession />
                     )}
-                  </div>
-
-                  {!isEmpty(otherSessions) && <Separator className="my-6" />}
-
-                  <div className="space-y-4">
                     {otherSessions?.map((session) => (
                       <Session key={session.id} session={session} />
                     ))}
-
-                    {!isEmpty}
                   </div>
-                </>
-              )}
-
-              {hasOtherSessions && (
-                <Button
-                  variant="outline"
-                  className="mt-6"
-                  onClick={handleRevokeOtherSessions}
-                  loading={revokeOtherSessionsMutation.isPending}
-                >
-                  Sign out all other sessions
-                </Button>
-              )}
+                )}
+              </Card>
             </div>
           </SettingsSection>
         </div>
       )}
+
+      <PasskeyCreateDialog
+        open={openPasskeyDialog}
+        onClose={openPasskeyDialogHandlers.close}
+      />
     </div>
   );
 }
@@ -180,7 +226,7 @@ function Session({
   session,
   isCurrentSession = false,
 }: {
-  session: UserSession;
+  session: Session;
   isCurrentSession?: boolean;
 }) {
   const router = useRouter();
@@ -210,7 +256,7 @@ function Session({
   }
 
   return (
-    <Card key={session.id} className="p-4">
+    <div key={session.id} className="p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="rounded-full bg-gray-100 p-3">
@@ -244,6 +290,49 @@ function Session({
           Sign out
         </Button>
       </div>
-    </Card>
+    </div>
+  );
+}
+
+function Passkey({ passkey }: { passkey: Passkey }) {
+  const apiUtils = api.useUtils();
+
+  const deletePasskeyMutation = useMutation({
+    mutationFn: removePasskey,
+    onSuccess: async () => {
+      await apiUtils.user.getUser.invalidate();
+    },
+  });
+
+  async function deletePasskey() {
+    await deletePasskeyMutation.mutateAsync(passkey.id);
+  }
+
+  return (
+    <div key={passkey.id} className="p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="rounded-full bg-gray-100 p-3">
+            <IconKey />
+          </div>
+          <div>
+            <p className="font-medium leading-6">{passkey.name}</p>
+            {/* <div className="flex items-center gap-4">
+              <p className="text-sm leading-6 text-gray-500">
+                {passkey.publicKey}
+              </p>
+            </div> */}
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={deletePasskey}
+          loading={deletePasskeyMutation.isPending}
+        >
+          <IconTrash className="h-4 w-4 text-red-500" />
+        </Button>
+      </div>
+    </div>
   );
 }
