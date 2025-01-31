@@ -2,18 +2,15 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   type DialogProps,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { generatePasskey } from "@/lib/auth-client";
 import { api } from "@/trpc/react";
 import { type Passkey } from "@/types/auth.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,7 +23,7 @@ interface Props extends DialogProps {
   onClose: () => void;
 }
 
-export function PasskeyUpdateDialog({ onClose, open }: Props) {
+export function PasskeyUpdateDialog({ onClose, open, passkey }: Props) {
   const {
     register,
     handleSubmit,
@@ -34,19 +31,24 @@ export function PasskeyUpdateDialog({ onClose, open }: Props) {
     reset,
   } = useForm<{ name: string }>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      name: passkey.name ?? "",
+    },
   });
 
   const apiUtils = api.useUtils();
 
-  const generatePasskeyMutation = useMutation({
-    mutationFn: generatePasskey,
+  const updatePasskeyMutation = api.user.updatePasskeyName.useMutation({
     onSuccess: async () => {
       await apiUtils.user.getUser.invalidate();
     },
   });
 
   const onSubmit = async (data: { name: string }) => {
-    await generatePasskeyMutation.mutateAsync(data.name);
+    await updatePasskeyMutation.mutateAsync({
+      id: passkey.id,
+      name: data.name,
+    });
     closeModal();
   };
 
@@ -59,18 +61,15 @@ export function PasskeyUpdateDialog({ onClose, open }: Props) {
     <Dialog open={open} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-[465px]">
         <DialogHeader>
-          <DialogTitle>Create a new passkey</DialogTitle>
+          <DialogTitle>Update passkey</DialogTitle>
         </DialogHeader>
-
-        <DialogDescription>
-          Login faster and more securely with passkeys.
-        </DialogDescription>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div>
             <Input
               label="Passkey name"
               {...register("name")}
+              defaultValue={passkey.name ?? ""}
               error={errors.name !== undefined}
               errorMessage={errors?.name?.message}
               allowAutoComplete={false}
@@ -82,7 +81,7 @@ export function PasskeyUpdateDialog({ onClose, open }: Props) {
               Close
             </Button>
             <Button loading={isSubmitting} type="submit">
-              Create passkey
+              Update passkey
             </Button>
           </DialogFooter>
         </form>

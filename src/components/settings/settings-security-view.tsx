@@ -3,9 +3,11 @@
 import GithubLogo from "@/assets/logos/github-logo.svg";
 import GoogleLogo from "@/assets/logos/google-logo.svg";
 import { PasskeyCreateDialog } from "@/components/settings/passkey-create-dialog";
+import { PasskeyUpdateDialog } from "@/components/settings/passkey-update-dialog";
 import { SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
@@ -93,7 +95,7 @@ export function SettingsSecurityView() {
             </div>
 
             <Card className="divide-y divide-gray-200 md:col-span-2">
-              <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar p-4">
+              <div className="flex items-center justify-between bg-sidebar p-4">
                 <p className="text-base font-medium leading-6">
                   Your connected accounts
                 </p>
@@ -312,13 +314,10 @@ function Session({
 }
 
 function Passkey({ passkey }: { passkey: Passkey }) {
+  const [openPasskeyDialog, openPasskeyDialogHandlers] = useDialog();
+  const [openDeletePasskeyDialog, openDeletePasskeyDialogHandlers] =
+    useDialog();
   const apiUtils = api.useUtils();
-
-  const updatePasskeyMutation = api.user.updatePasskeyName.useMutation({
-    onSuccess: async () => {
-      await apiUtils.user.getUser.invalidate();
-    },
-  });
 
   const deletePasskeyMutation = useMutation({
     mutationFn: removePasskey,
@@ -326,10 +325,6 @@ function Passkey({ passkey }: { passkey: Passkey }) {
       await apiUtils.user.getUser.invalidate();
     },
   });
-
-  async function updatePasskeyName(name: string) {
-    await updatePasskeyMutation.mutateAsync({ id: passkey.id, name });
-  }
 
   async function deletePasskey() {
     await deletePasskeyMutation.mutateAsync(passkey.id);
@@ -355,21 +350,33 @@ function Passkey({ passkey }: { passkey: Passkey }) {
           <Button
             variant="outline"
             size="icon"
-            onClick={deletePasskey}
-            loading={deletePasskeyMutation.isPending}
+            onClick={openPasskeyDialogHandlers.open}
           >
             <IconPencil className="size-5" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            onClick={deletePasskey}
-            loading={deletePasskeyMutation.isPending}
+            onClick={openDeletePasskeyDialogHandlers.open}
           >
             <IconTrash className="size-5 text-red-500" />
           </Button>
         </div>
       </div>
+
+      <PasskeyUpdateDialog
+        open={openPasskeyDialog}
+        onClose={openPasskeyDialogHandlers.close}
+        passkey={passkey}
+      />
+
+      <DeleteDialog
+        title="Passkey"
+        open={openDeletePasskeyDialog}
+        onClose={openDeletePasskeyDialogHandlers.close}
+        onDelete={deletePasskey}
+        loading={deletePasskeyMutation.isPending}
+      />
     </div>
   );
 }
