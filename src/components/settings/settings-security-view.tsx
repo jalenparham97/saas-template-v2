@@ -3,11 +3,11 @@
 import GithubLogo from "@/assets/logos/github-logo.svg";
 import GoogleLogo from "@/assets/logos/google-logo.svg";
 import { PasskeyCreateDialog } from "@/components/settings/passkey-create-dialog";
+import { PasskeyDeleteDialog } from "@/components/settings/passkey-delete-dialog";
 import { PasskeyUpdateDialog } from "@/components/settings/passkey-update-dialog";
 import { SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
@@ -16,14 +16,20 @@ import {
   authClient,
   type AuthProvider,
   linkSocialProvider,
-  removePasskey,
 } from "@/lib/auth-client";
 import { capitalizeFirstLetter } from "@/lib/capitalize-first-letter";
 import { APP_NAME, APP_ROUTES } from "@/lib/contants";
 import { dayjs } from "@/lib/dayjs";
 import { cn } from "@/lib/utils";
-import { api } from "@/trpc/react";
+import {
+  useDeleteUserPasskeyMutation,
+  useRevokeAllUserSessionsMutation,
+  useRevokeUserSessionMutation,
+  useUser,
+  useUserCurrentSession,
+} from "@/queries/user.queries";
 import { type Passkey, type Session } from "@/types/auth.types";
+import { formatDate } from "@/utils/format-date";
 import { parseUserAgent } from "@/utils/parse-user-agent";
 import {
   IconCircleCheck,
@@ -33,15 +39,13 @@ import {
   IconServer,
   IconTrash,
 } from "@tabler/icons-react";
-import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export function SettingsSecurityView() {
   const [openPasskeyDialog, openPasskeyDialogHandlers] = useDialog();
-  const user = api.user.getUser.useQuery();
-  const currentSession = api.user.getActiveSession.useQuery();
-  const apiUtils = api.useUtils();
+  const user = useUser();
+  const currentSession = useUserCurrentSession();
 
   const githubAccount = user.data?.accounts.find(
     (account) => account.providerId === "github",
@@ -59,11 +63,7 @@ export function SettingsSecurityView() {
     (session) => session.id === currentSession?.data?.session?.id,
   );
 
-  const revokeAllSessionsMutaion = api.user.revokeAllSessions.useMutation({
-    onSuccess: async () => {
-      await apiUtils.user.getUser.invalidate();
-    },
-  });
+  const revokeAllSessionsMutaion = useRevokeAllUserSessionsMutation();
 
   async function revokeAllSessions() {
     await revokeAllSessionsMutaion.mutateAsync();
@@ -83,6 +83,31 @@ export function SettingsSecurityView() {
 
       {!user.isLoading && (
         <div>
+          <SettingsSection>
+            <div>
+              <h2 className="text-base font-semibold leading-7">Password</h2>
+              <p className="mt-1 text-sm leading-6 text-gray-500">
+                Manage settings for your account passwords.
+              </p>
+            </div>
+
+            <Card className="divide-y divide-gray-200 md:col-span-2">
+              <div className="flex items-center justify-between bg-sidebar p-4">
+                <p className="text-base font-medium leading-6">
+                  <Button variant="outline">Change password</Button>
+                </p>
+              </div>
+              <div className="p-4">
+                <p className="leading-6 text-gray-500">
+                  You can change or reset your password here. If you don&apos;t
+                  have a password, you can create one here.
+                </p>
+              </div>
+            </Card>
+          </SettingsSection>
+
+          <Separator className="my-8" />
+
           <SettingsSection>
             <div>
               <h2 className="text-base font-semibold leading-7">
@@ -143,9 +168,7 @@ export function SettingsSecurityView() {
               </div>
             </Card>
           </SettingsSection>
-
           <Separator className="my-6" />
-
           <SettingsSection>
             <div>
               <h2 className="text-base font-semibold leading-7">Passkeys</h2>
@@ -190,9 +213,7 @@ export function SettingsSecurityView() {
               </Card>
             </div>
           </SettingsSection>
-
           <Separator className="my-6" />
-
           <SettingsSection>
             <div>
               <h2 className="text-base font-semibold leading-7">Sessions</h2>
@@ -249,17 +270,12 @@ function Session({
   isCurrentSession?: boolean;
 }) {
   const router = useRouter();
-  const apiUtils = api.useUtils();
   const parsedAgent = parseUserAgent(session?.userAgent ?? "");
 
   const browserName = parsedAgent.browser.name;
   const osName = parsedAgent.os.name ?? "";
 
-  const revokeSessionMutation = api.user.revokeSession.useMutation({
-    onSuccess: async () => {
-      await apiUtils.user.getUser.invalidate();
-    },
-  });
+  const revokeSessionMutation = useRevokeUserSessionMutation();
 
   async function handleRevokeSession() {
     if (isCurrentSession) {
@@ -317,14 +333,8 @@ function Passkey({ passkey }: { passkey: Passkey }) {
   const [openPasskeyDialog, openPasskeyDialogHandlers] = useDialog();
   const [openDeletePasskeyDialog, openDeletePasskeyDialogHandlers] =
     useDialog();
-  const apiUtils = api.useUtils();
 
-  const deletePasskeyMutation = useMutation({
-    mutationFn: removePasskey,
-    onSuccess: async () => {
-      await apiUtils.user.getUser.invalidate();
-    },
-  });
+  const deletePasskeyMutation = useDeleteUserPasskeyMutation();
 
   async function deletePasskey() {
     await deletePasskeyMutation.mutateAsync(passkey.id);
@@ -339,11 +349,11 @@ function Passkey({ passkey }: { passkey: Passkey }) {
           </div>
           <div>
             <p className="font-medium leading-6">{passkey.name}</p>
-            {/* <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4">
               <p className="text-sm leading-6 text-gray-500">
-                {passkey.publicKey}
+                Added on {formatDate(passkey.createdAt as Date)}
               </p>
-            </div> */}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -370,8 +380,8 @@ function Passkey({ passkey }: { passkey: Passkey }) {
         passkey={passkey}
       />
 
-      <DeleteDialog
-        title="Passkey"
+      <PasskeyDeleteDialog
+        passkeyName={passkey.name ?? ""}
         open={openDeletePasskeyDialog}
         onClose={openDeletePasskeyDialogHandlers.close}
         onDelete={deletePasskey}
