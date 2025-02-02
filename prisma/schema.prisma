@@ -7,21 +7,17 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-  // Further reading:
-  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id
+  id            String    @id @default(cuid())
   name          String
   email         String
   emailVerified Boolean
   image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
   passkeys      Passkey[]
@@ -31,11 +27,11 @@ model User {
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
   expiresAt DateTime
   token     String
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
@@ -46,7 +42,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(cuid())
   accountId             String
   providerId            String
   userId                String
@@ -58,35 +54,36 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@map("account")
 }
 
 model Verification {
-  id         String    @id
+  id         String   @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("verification")
 }
 
 model Passkey {
-  id           String    @id
+  id           String   @id @default(cuid())
   name         String?
   publicKey    String
   userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   credentialID String
   counter      Int
   deviceType   String
   backedUp     Boolean
   transports   String?
-  createdAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("passkey")
 }

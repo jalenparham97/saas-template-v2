@@ -30,7 +30,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       icon,
       label,
       description,
-      id = nanoid(),
+      id,
       error,
       errorMessage,
       allowAutoComplete = true,

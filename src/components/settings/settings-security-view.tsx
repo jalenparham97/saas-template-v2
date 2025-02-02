@@ -92,16 +92,19 @@ export function SettingsSecurityView() {
             </div>
 
             <Card className="divide-y divide-gray-200 md:col-span-2">
-              <div className="flex items-center justify-between bg-sidebar p-4">
+              <div className="flex items-center justify-between bg-sidebar px-6 py-4">
                 <p className="text-base font-medium leading-6">
-                  <Button variant="outline">Change password</Button>
+                  Your account password
                 </p>
               </div>
-              <div className="p-4">
+              <div className="p-6">
                 <p className="leading-6 text-gray-500">
                   You can change or reset your password here. If you don&apos;t
                   have a password, you can create one here.
                 </p>
+              </div>
+              <div className="border-t border-gray-200 p-6">
+                <Button>Change password</Button>
               </div>
             </Card>
           </SettingsSection>
@@ -120,13 +123,13 @@ export function SettingsSecurityView() {
             </div>
 
             <Card className="divide-y divide-gray-200 md:col-span-2">
-              <div className="flex items-center justify-between bg-sidebar p-4">
+              <div className="flex items-center justify-between bg-sidebar px-6 py-4">
                 <p className="text-base font-medium leading-6">
                   Your connected accounts
                 </p>
               </div>
 
-              <div className="flex items-center justify-between p-4">
+              <div className="flex items-center justify-between px-6 py-4">
                 <div className="flex items-center gap-3">
                   <Image src={GithubLogo} alt="alt" className="size-7" />
                   <p className="font-medium">Github</p>
@@ -146,7 +149,7 @@ export function SettingsSecurityView() {
                   )}
                 </div>
               </div>
-              <div className="flex items-center justify-between p-4">
+              <div className="flex items-center justify-between px-6 py-4">
                 <div className="flex items-center gap-3">
                   <Image src={GoogleLogo} alt="alt" className="size-7" />
                   <p className="font-medium">Google</p>
@@ -180,7 +183,7 @@ export function SettingsSecurityView() {
 
             <div className="md:col-span-2">
               <Card>
-                <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar p-4">
+                <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar px-6 py-4">
                   <p className="text-base font-medium leading-6">
                     Your passkeys
                   </p>
@@ -213,7 +216,9 @@ export function SettingsSecurityView() {
               </Card>
             </div>
           </SettingsSection>
+
           <Separator className="my-6" />
+
           <SettingsSection>
             <div>
               <h2 className="text-base font-semibold leading-7">Sessions</h2>
@@ -225,7 +230,7 @@ export function SettingsSecurityView() {
 
             <div className="md:col-span-2">
               <Card>
-                <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar p-4">
+                <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar px-6 py-4">
                   <p className="text-base font-medium leading-6">
                     Your sessions
                   </p>
@@ -291,7 +296,7 @@ function Session({
   }
 
   return (
-    <div key={session.id} className="p-4">
+    <div key={session.id} className="px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="rounded-full bg-gray-100 p-3">
@@ -341,7 +346,7 @@ function Passkey({ passkey }: { passkey: Passkey }) {
   }
 
   return (
-    <div key={passkey.id} className="p-4">
+    <div key={passkey.id} className="px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="rounded-full bg-gray-100 p-3">

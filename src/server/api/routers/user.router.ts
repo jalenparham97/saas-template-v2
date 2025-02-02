@@ -1,4 +1,6 @@
+import { APP_ROUTES } from "@/lib/contants";
 import { z } from "@/lib/zod";
+import { UserUpdateSchema } from "@/schemas/user.schemas";
 import { auth } from "@/server/auth";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -20,6 +22,31 @@ export const userRouter = createTRPCRouter({
     });
 
     return user;
+  }),
+  updateUser: protectedProcedure
+    .input(UserUpdateSchema)
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { name: input.name ?? ctx.session.user.name, image: input.image },
+        include: {
+          accounts: {
+            select: {
+              id: true,
+              accountId: true,
+              providerId: true,
+            },
+          },
+          passkeys: true,
+          sessions: true,
+        },
+      });
+    }),
+  deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
+    await auth.api.deleteUser({
+      headers: ctx.headers,
+      body: { callbackURL: `/${APP_ROUTES.LOGIN}` },
+    });
   }),
   revokeSession: protectedProcedure
     .input(z.object({ token: z.string() }))

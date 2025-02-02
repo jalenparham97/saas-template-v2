@@ -15,6 +15,9 @@ const config = {
       },
     ];
   },
+  devIndicators: {
+    buildActivityPosition: "bottom-right",
+  },
 };
 
 export default config;

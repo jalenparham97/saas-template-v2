@@ -26,18 +26,17 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { APP_ROUTES } from "@/lib/contants";
+import { useUser } from "@/queries/user.queries";
 import { getInitials } from "@/utils/get-initials";
 import { useRouter } from "next/navigation";
 
 export function NavUser() {
   const router = useRouter();
-  const session = authClient.useSession();
+  const user = useUser();
 
-  if (!session?.data?.user) {
+  if (!user?.data) {
     return null;
   }
-
-  const user = session.data.user;
 
   const handleLogout = async () => {
     await authClient.signOut({
@@ -59,14 +58,14 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.image ?? ""} alt={user.name} />
+                <AvatarImage src={user.data.image ?? ""} alt={user.data.name} />
                 <AvatarFallback className="rounded-lg">
-                  {getInitials(user.name)}
+                  {getInitials(user.data.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-semibold">{user.data.name}</span>
+                <span className="truncate text-xs">{user.data.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -75,14 +74,19 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.image ?? ""} alt={user.name} />
+                  <AvatarImage
+                    src={user.data.image ?? ""}
+                    alt={user.data.name}
+                  />
                   <AvatarFallback className="rounded-lg">
-                    {getInitials(user.name)}
+                    {getInitials(user.data.name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-semibold">
+                    {user.data.name}
+                  </span>
+                  <span className="truncate text-xs">{user.data.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

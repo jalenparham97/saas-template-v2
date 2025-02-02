@@ -32,6 +32,9 @@ export const authConfig: BetterAuthOptions = {
     changeEmail: {
       enabled: true,
     },
+    deleteUser: {
+      enabled: true,
+    },
   },
   socialProviders: {
     google: {
