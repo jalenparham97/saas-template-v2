@@ -108,9 +108,23 @@ const SORTED_PLANS = Object.keys(FEATURE_UNLOCKS_BY_PLAN);
 export const ALL_FEATURES = Object.values(FEATURE_UNLOCKS_BY_PLAN).flat();
 
 /**
- * hasFeatureAccess checks if a subscription has access to a feature.
- * This assumes that subscriptions on the SORTED_PRODUCT_IDS list
- * have access to all features unlocked by previous products.
+ * Determines if a user has access to a specific feature based on their subscription plan.
+ *
+ * @param plan - The user's current subscription plan. Can be null, undefined, or a string matching a valid plan.
+ * @param feature - The feature to check access for.
+ *
+ * @returns {boolean} True if the user's plan includes access to the specified feature, false otherwise.
+ *
+ * @example
+ * ```typescript
+ * hasFeatureAccess('pro', "1 workspace") // returns true
+ * hasFeatureAccess('free', "1 workspace") // returns false
+ * ```
+ *
+ * @remarks
+ * The function checks the plan against a sorted list of plans (SORTED_PLANS) and aggregates features
+ * from all plans up to and including the user's plan level. If the plan is invalid or null,
+ * access is denied.
  */
 export function hasFeatureAccess(
   plan: string | null | undefined,

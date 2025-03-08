@@ -1,6 +1,6 @@
 import { type BetterAuthOptions } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { openAPI } from "better-auth/plugins";
+import { openAPI, organization } from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey";
 
 import { env } from "@/env";
@@ -18,6 +18,7 @@ export const authConfig: BetterAuthOptions = {
       rpID: "localhost",
       origin: "http://localhost:3000",
     }),
+    organization(),
   ],
   // session: {
   //   cookieCache: {

@@ -14,7 +14,7 @@ export function NavMain() {
   const segment = useSelectedLayoutSegment();
   const pathname = usePathname();
 
-  function isActive(path: string, name: string) {
+  function isActive({ path, name }: { path: string; name: string }) {
     return segment === name.toLowerCase() || pathname === path;
   }
 
@@ -23,7 +23,9 @@ export function NavMain() {
       <SidebarMenu>
         <Link href="/dashboard">
           <SidebarMenuItem>
-            <SidebarMenuButton isActive={isActive("/dashboard", "dashboard")}>
+            <SidebarMenuButton
+              isActive={isActive({ path: "/dashboard", name: "dashboard" })}
+            >
               <IconHome size={18} />
               <span>Dashboard</span>
             </SidebarMenuButton>
@@ -31,7 +33,9 @@ export function NavMain() {
         </Link>
         <Link href="/settings">
           <SidebarMenuItem>
-            <SidebarMenuButton isActive={isActive("/settings", "settings")}>
+            <SidebarMenuButton
+              isActive={isActive({ path: "/settings", name: "settings" })}
+            >
               <IconSettings size={18} />
               <span>Settings</span>
             </SidebarMenuButton>

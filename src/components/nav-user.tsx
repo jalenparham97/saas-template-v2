@@ -28,6 +28,8 @@ import { authClient } from "@/lib/auth-client";
 import { APP_ROUTES } from "@/lib/contants";
 import { useUser } from "@/queries/user.queries";
 import { getInitials } from "@/utils/get-initials";
+import { IconSettings } from "@tabler/icons-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export function NavUser() {
@@ -90,27 +92,21 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            {/* <DropdownMenuSeparator /> */}
+            {/* <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
-            </DropdownMenuGroup>
+            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
+              <Link href="/settings">
+                <DropdownMenuItem>
+                  <IconSettings />
+                  Settings
+                </DropdownMenuItem>
+              </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>

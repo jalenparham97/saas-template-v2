@@ -16,7 +16,7 @@ const config = {
     ];
   },
   devIndicators: {
-    buildActivityPosition: "bottom-right",
+    position: "bottom-right",
   },
 };
 
