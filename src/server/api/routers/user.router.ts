@@ -1,4 +1,5 @@
 import { APP_ROUTES } from "@/lib/contants";
+import { stripeApiClient } from "@/lib/stripe";
 import { z } from "@/lib/zod";
 import { UserUpdateSchema } from "@/schemas/user.schemas";
 import { auth } from "@/server/auth";
@@ -43,10 +44,22 @@ export const userRouter = createTRPCRouter({
       });
     }),
   deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
-    await auth.api.deleteUser({
-      headers: ctx.headers,
-      body: { callbackURL: `/${APP_ROUTES.LOGIN}` },
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
     });
+
+    await stripeApiClient.customers.del(user?.stripeCustomerId ?? "");
+
+    await ctx.db.$transaction([
+      ctx.db.subscription.deleteMany({
+        where: { stripeCustomerId: user?.stripeCustomerId ?? "" },
+      }),
+      ctx.db.user.delete({
+        where: { id: ctx.session.user.id },
+      }),
+    ]);
+
+    return { message: "Account deleted successfully" };
   }),
   revokeSession: protectedProcedure
     .input(z.object({ token: z.string() }))
