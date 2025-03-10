@@ -87,7 +87,7 @@ export function SignupForm({
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-6">
               <div className="grid gap-6">
-                <div className="grid gap-2">
+                <div className="grid">
                   <Input
                     id="name"
                     type="text"
@@ -96,6 +96,8 @@ export function SignupForm({
                     error={errors.name !== undefined}
                     errorMessage={errors?.name?.message}
                   />
+                </div>
+                <div className="grid">
                   <Input
                     id="email"
                     type="email"
@@ -105,18 +107,10 @@ export function SignupForm({
                     errorMessage={errors?.email?.message}
                   />
                 </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Forgot your password?
-                    </a>
-                  </div>
+                <div className="grid">
                   <Input
                     id="password"
+                    label="Password"
                     type="password"
                     {...register("password")}
                     error={errors.password !== undefined}

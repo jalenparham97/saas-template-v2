@@ -1,6 +1,7 @@
 "use client";
 
 import { AccountDeleteDialog } from "@/components/settings/account-delete-dialog";
+import { ChangeEmailDialog } from "@/components/settings/change-email-dialog";
 import { SettingsSection } from "@/components/settings/settings-section";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,7 +18,11 @@ import {
   useFileDeleteMutation,
   useFileUploadUrlMutation,
 } from "@/queries/storage.queries";
-import { useUser, useUserUpdateMutation } from "@/queries/user.queries";
+import {
+  useChangeEmailMutation,
+  useUser,
+  useUserUpdateMutation,
+} from "@/queries/user.queries";
 import { UserUpdateSchema } from "@/schemas/user.schemas";
 import { type UserUpdateInput } from "@/types/user.types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +31,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface Props {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
 export function SettingsGeneralView({ searchParams }: Props) {
@@ -44,13 +49,18 @@ export function SettingsGeneralView({ searchParams }: Props) {
 
   const user = useUser();
 
-  const userUpdateMutation = useUserUpdateMutation({ showToast: true });
   const uploadUrlMutation = useFileUploadUrlMutation();
   const deleteFileMutation = useFileDeleteMutation();
+  const userUpdateMutation = useUserUpdateMutation({ showToast: true });
+  const changeEmailMutation = useChangeEmailMutation({
+    onSuccess: () => {
+      setShowEmailSent(true);
+    },
+  });
 
   const onSubmit = async (data: UserUpdateInput) => {
     await userUpdateMutation.mutateAsync({
-      name: data.name || user?.data?.name,
+      name: data.name ?? user?.data?.name,
     });
   };
 
@@ -61,7 +71,7 @@ export function SettingsGeneralView({ searchParams }: Props) {
 
     if (!userImage.startsWith(env.NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL)) return;
 
-    const fileKey = userImage.split("/").pop() as string;
+    const fileKey = userImage.split("/").pop()!;
 
     try {
       return await deleteFileMutation.mutateAsync({ fileKey });
@@ -97,6 +107,11 @@ export function SettingsGeneralView({ searchParams }: Props) {
     });
   };
 
+  const handleUpdateEmail = async (email: string) => {
+    setNewEmail(email);
+    await changeEmailMutation.mutateAsync({ newEmail: email });
+  };
+
   return (
     <div>
       {user.isLoading && (
@@ -125,7 +140,7 @@ export function SettingsGeneralView({ searchParams }: Props) {
                 <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:max-w-xl sm:grid-cols-6">
                   <div className="col-span-full flex items-center gap-x-8">
                     <Avatar className="h-24 w-24 flex-none rounded-lg object-cover">
-                      <AvatarImage src={user?.data?.image || ""} />
+                      <AvatarImage src={user?.data?.image ?? ""} />
                       <AvatarFallback className="rounded-none bg-gray-200 uppercase">
                         <IconPhoto size={40} />
                       </AvatarFallback>
@@ -149,7 +164,7 @@ export function SettingsGeneralView({ searchParams }: Props) {
                       label="Full name"
                       autoComplete="given-name"
                       {...register("name")}
-                      defaultValue={user?.data?.name || ""}
+                      defaultValue={user?.data?.name ?? ""}
                     />
                   </div>
 
@@ -158,7 +173,7 @@ export function SettingsGeneralView({ searchParams }: Props) {
                       label="Email address"
                       autoComplete="email"
                       type="email"
-                      value={user?.data?.email || ""}
+                      value={user?.data?.email ?? ""}
                       disabled
                       className=""
                     />
@@ -167,57 +182,35 @@ export function SettingsGeneralView({ searchParams }: Props) {
                         variant="outline"
                         size="sm"
                         type="button"
-                        // onClick={changeEmailModalHandler.open}
+                        onClick={changeEmailModalHandler.open}
                       >
                         Change email
                       </Button>
                     </div>
+
+                    {showEmailSent && (
+                      <Alert className="relative mt-6">
+                        <AlertTitle>Check your email</AlertTitle>
+                        <AlertDescription>
+                          <p className="text-gray-900">
+                            We&apos;ve sent an email to your inbox to change you
+                            email to{" "}
+                            <span className="font-semibold">{newEmail}</span>.
+                            To verify this change, click the link in the email.
+                          </p>
+                        </AlertDescription>
+                        <Button
+                          size="icon"
+                          type="button"
+                          className="absolute right-1 top-1 h-8 w-8"
+                          variant="ghost"
+                          onClick={() => setShowEmailSent(false)}
+                        >
+                          <IconX className="h-4 w-4" />
+                        </Button>
+                      </Alert>
+                    )}
                   </div>
-
-                  {/* {showEmailSent && (
-              <div className="sm:col-span-full">
-                <Alert className="relative">
-                  <AlertTitle>Check your email</AlertTitle>
-                  <AlertDescription>
-                    <p className="text-gray-900">
-                      We&apos;ve sent an email to{" "}
-                      <span className="font-semibold">{newEmail}</span>. To
-                      verify this change, click the link in the email. The link
-                      is valid for 1 hour.
-                    </p>
-                  </AlertDescription>
-                  <Button
-                    size="icon"
-                    type="button"
-                    className="absolute right-1 top-1 h-8 w-8"
-                    variant="ghost"
-                    onClick={() => setShowEmailSent(false)}
-                  >
-                    <IconX className="h-4 w-4" />
-                  </Button>
-                </Alert>
-              </div>
-            )} */}
-
-                  {/* {emailError && (
-              <div className="sm:col-span-full">
-                <Alert className="relative">
-                  <AlertTitle>{errorMessageTitle}</AlertTitle>
-                  <AlertDescription>
-                    <p className="text-gray-900">{errorMessage}</p>
-                  </AlertDescription>
-                  <Button
-                    size="icon"
-                    type="button"
-                    className="absolute right-1 top-1 h-8 w-8"
-                    variant="ghost"
-                    onClick={() => setEmailError("")}
-                  >
-                    <IconX className="h-4 w-4" />
-                  </Button>
-                </Alert>
-              </div>
-            )} */}
                 </div>
               </form>
               <div className="border-t border-gray-200 p-6">
@@ -285,6 +278,12 @@ export function SettingsGeneralView({ searchParams }: Props) {
       <AccountDeleteDialog
         open={deleteAccountModal}
         onClose={deleteAccountModalHandler.close}
+      />
+
+      <ChangeEmailDialog
+        open={changeEmailModal}
+        onClose={changeEmailModalHandler.close}
+        submit={handleUpdateEmail}
       />
     </div>
   );

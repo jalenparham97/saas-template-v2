@@ -1,11 +1,16 @@
 import { env } from "@/env";
 import { APP_ROUTES } from "@/lib/contants";
-import { passkeyClient } from "better-auth/client/plugins";
+import { stripeClient } from "@better-auth/stripe/client";
+import { adminClient, passkeyClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_APP_BASE_URL, // the base url of your auth server
-  plugins: [passkeyClient()],
+  plugins: [
+    adminClient(),
+    passkeyClient(),
+    stripeClient({ subscription: true }),
+  ],
 });
 
 /**
@@ -65,4 +70,42 @@ export async function generatePasskey(name: string) {
  */
 export async function removePasskey(id: string) {
   return await authClient.passkey.deletePasskey({ id });
+}
+
+/**
+ * Sends a password reset email to the specified email address.
+ * @param email - The email address of the user requesting password reset
+ * @returns A promise that resolves when the password reset email has been sent
+ * @throws Will throw an error if the email sending fails
+ */
+export async function sendPasswordResetEmail(email: string) {
+  return await authClient.forgetPassword({
+    email,
+    redirectTo: APP_ROUTES.RESET_PASSWORD,
+  });
+}
+
+/**
+ * Sends a verification email to change the user's email address.
+ * @param newEmail - The new email address to change to
+ * @returns A promise that resolves when the verification email has been sent
+ * @throws Will throw an error if the email verification request fails
+ */
+export async function sendChangeEmailVerificationEmail(newEmail: string) {
+  return await authClient.changeEmail({
+    newEmail,
+    callbackURL: APP_ROUTES.SETTINGS,
+  });
+}
+
+/**
+ * Sends an email verification email to the specified email address.
+ * @param email - The email address to send the verification email to.
+ * @returns A promise that resolves when the email is sent.
+ */
+export async function sendEmailVerificationEmail(email: string) {
+  return await authClient.sendVerificationEmail({
+    email,
+    callbackURL: APP_ROUTES.DASHBOARD,
+  });
 }

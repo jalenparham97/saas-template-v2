@@ -1,3 +1,4 @@
+import { paymentsRouter } from "@/server/api/routers/payments.router";
 import { storageRouter } from "@/server/api/routers/storage.router";
 import { userRouter } from "@/server/api/routers/user.router";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
@@ -10,6 +11,7 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 export const appRouter = createTRPCRouter({
   user: userRouter,
   storage: storageRouter,
+  payments: paymentsRouter,
 });
 
 // export type definition of API

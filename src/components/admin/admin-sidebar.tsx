@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
+import { AdminNav } from "@/components/admin/admin-nav";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -25,7 +26,6 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { VerifyEmailMessage } from "@/components/verify-email-message";
 import { IconX } from "@tabler/icons-react";
 
 // This is sample data.
@@ -54,17 +54,18 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AdminSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain />
+        <AdminNav />
       </SidebarContent>
       <SidebarFooter>
-        <VerifyEmailMessage />
         <NavUser />
       </SidebarFooter>
     </Sidebar>

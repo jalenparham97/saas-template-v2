@@ -9,6 +9,7 @@ import { SettingsSection } from "@/components/settings/settings-section";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { Loader } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
 import { useDialog } from "@/hooks/use-dialog";
@@ -17,9 +18,7 @@ import {
   type AuthProvider,
   linkSocialProvider,
 } from "@/lib/auth-client";
-import { capitalizeFirstLetter } from "@/lib/capitalize-first-letter";
 import { APP_NAME, APP_ROUTES } from "@/lib/contants";
-import { dayjs } from "@/lib/dayjs";
 import { cn } from "@/lib/utils";
 import {
   useDeleteUserPasskeyMutation,
@@ -27,8 +26,10 @@ import {
   useRevokeUserSessionMutation,
   useUser,
   useUserCurrentSession,
+  useUserPasswordResetMutation,
 } from "@/queries/user.queries";
 import { type Passkey, type Session } from "@/types/auth.types";
+import { capitalizeFirstLetter } from "@/utils/capitalize-first-letter";
 import { formatDate } from "@/utils/format-date";
 import { parseUserAgent } from "@/utils/parse-user-agent";
 import {
@@ -41,6 +42,18 @@ import {
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+/**
+ * This function takes an IP address and returns it in the correct format.
+ * @param ipAddress
+ * @returns The IP address with the correct format
+ */
+function getSessionIpAddress(ipAddress: string) {
+  if (ipAddress === "::1" || ipAddress === "") {
+    return "127.0.0.1";
+  }
+  return ipAddress;
+}
 
 export function SettingsSecurityView() {
   const [openPasskeyDialog, openPasskeyDialogHandlers] = useDialog();
@@ -55,6 +68,10 @@ export function SettingsSecurityView() {
     (account) => account.providerId === "google",
   );
 
+  const credentialsAccount = user.data?.accounts.find(
+    (account) => account.providerId === "credential",
+  );
+
   const otherSessions = user?.data?.sessions.filter(
     (session) => session.id !== currentSession?.data?.session?.id,
   );
@@ -63,6 +80,7 @@ export function SettingsSecurityView() {
     (session) => session.id === currentSession?.data?.session?.id,
   );
 
+  const passwordResetMutation = useUserPasswordResetMutation();
   const revokeAllSessionsMutaion = useRevokeAllUserSessionsMutation();
 
   async function revokeAllSessions() {
@@ -73,6 +91,11 @@ export function SettingsSecurityView() {
     await linkSocialProvider(provider, `${APP_ROUTES.SETTINGS}/security`);
   }
 
+  const handlePasswordReset = async () => {
+    await passwordResetMutation.mutateAsync({
+      email: user.data?.email ?? "",
+    });
+  };
   return (
     <div>
       {user.isLoading && (
@@ -98,13 +121,32 @@ export function SettingsSecurityView() {
                 </p>
               </div>
               <div className="p-6">
-                <p className="leading-6 text-gray-500">
-                  You can change or reset your password here. If you don&apos;t
-                  have a password, you can create one here.
-                </p>
+                {credentialsAccount && (
+                  <>
+                    <Input
+                      type="password"
+                      value="********************************"
+                      className="md:w-[420px]"
+                      disabled
+                    />
+                  </>
+                )}
+                {!credentialsAccount && (
+                  <>
+                    <p className="max-w-2xl leading-6 text-gray-500">
+                      You dont have a password. You can create one by going
+                      through the reset password process.
+                    </p>
+                  </>
+                )}
               </div>
               <div className="border-t border-gray-200 p-6">
-                <Button>Change password</Button>
+                <Button
+                  onClick={handlePasswordReset}
+                  loading={passwordResetMutation.isPending}
+                >
+                  {credentialsAccount ? "Change password" : "Create a password"}
+                </Button>
               </div>
             </Card>
           </SettingsSection>
@@ -308,16 +350,20 @@ function Session({
             </p>
             <div className="flex items-center gap-4">
               <p className="text-sm leading-6 text-gray-500">
-                {session.ipAddress} -{" "}
-                <span
-                  className={cn({
-                    "font-medium text-green-600": isCurrentSession,
-                  })}
-                >
-                  {isCurrentSession
-                    ? "Current session"
-                    : `Last active ${dayjs(session.updatedAt).fromNow()}`}
-                </span>
+                {getSessionIpAddress(session.ipAddress ?? "")}
+                {isCurrentSession && (
+                  <>
+                    {" "}
+                    -{" "}
+                    <span
+                      className={cn({
+                        "font-medium text-green-600": isCurrentSession,
+                      })}
+                    >
+                      Current session
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           </div>

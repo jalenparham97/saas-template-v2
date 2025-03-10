@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import { dayjs } from "@/lib/dayjs";
 
 /**
  * Formats a date string or Date object into a human-readable string
@@ -14,6 +14,10 @@ import dayjs from "dayjs";
  * formatDate('2023-12-25', 'dddd, MMMM D')    // returns "Monday, December 25"
  * ```
  */
-export const formatDate = (date: string | Date, format = "MMM DD, YYYY") => {
+export const formatDate = (
+  date: string | Date | undefined,
+  format = "MMM DD, YYYY",
+) => {
+  if (!date) return "";
   return dayjs(date).format(format);
 };
