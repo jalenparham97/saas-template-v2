@@ -20,7 +20,9 @@ export const authConfig: BetterAuthOptions = {
     provider: "postgresql",
   }),
   plugins: [
-    admin(),
+    admin({
+      adminRoles: ["admin", "superadmin"],
+    }),
     openAPI(),
     passkey({
       rpName: APP_NAME,

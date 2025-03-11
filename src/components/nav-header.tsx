@@ -5,12 +5,16 @@ import { capitalizeFirstLetter } from "@/utils/capitalize-first-letter";
 import { Command } from "lucide-react";
 import Link from "next/link";
 
-export function NavHeader() {
+interface NavHeaderProps {
+  href?: string;
+}
+
+export function NavHeader({ href = "/dashboard" }: NavHeaderProps) {
   const subscription = useSubscriptions();
 
   return (
     <SidebarMenuButton size="lg" asChild>
-      <Link href="/dashboard">
+      <Link href={href}>
         <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
           <Command className="size-4" />
         </div>

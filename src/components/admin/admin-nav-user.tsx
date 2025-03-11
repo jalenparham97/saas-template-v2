@@ -27,7 +27,7 @@ import { IconSettings } from "@tabler/icons-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export function NavUser() {
+export function AdminNavUser() {
   const router = useRouter();
   const user = useUser();
 
