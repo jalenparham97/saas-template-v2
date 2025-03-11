@@ -24,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import { APP_ROUTES } from "@/lib/contants";
 import { useUser } from "@/queries/user.queries";
@@ -37,7 +38,7 @@ export function NavUser() {
   const user = useUser();
 
   if (!user?.data) {
-    return null;
+    return <Skeleton className="h-12 w-full bg-sidebar-accent" />;
   }
 
   const handleLogout = async () => {
