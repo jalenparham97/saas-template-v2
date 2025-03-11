@@ -54,10 +54,15 @@ export const useUserUpdateMutation = (options?: QueryOptions) => {
 export function useUserDeleteAccountMutation() {
   const router = useRouter();
 
-  return useMutation({
-    mutationFn: async () => await authClient.deleteUser(),
-    onSuccess: () => {
-      router.push(APP_ROUTES.SIGN_UP);
+  return api.user.deleteAccount.useMutation({
+    onSuccess: async () => {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push(APP_ROUTES.LOGIN);
+          },
+        },
+      });
     },
     onError: (error) => {
       console.log(error);
@@ -67,6 +72,20 @@ export function useUserDeleteAccountMutation() {
       });
     },
   });
+
+  // return useMutation({
+  //   mutationFn: async () => await authClient.deleteUser(),
+  //   onSuccess: () => {
+  //     router.push(APP_ROUTES.SIGN_UP);
+  //   },
+  //   onError: (error) => {
+  //     console.log(error);
+  //     toast.error("Something went wrong!", {
+  //       description: error.message,
+  //       closeButton: true,
+  //     });
+  //   },
+  // });
 }
 
 export function useRevokeAllUserSessionsMutation() {

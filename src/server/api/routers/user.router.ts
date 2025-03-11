@@ -3,6 +3,7 @@ import { stripeApiClient } from "@/lib/stripe";
 import { z } from "@/lib/zod";
 import { UserUpdateSchema } from "@/schemas/user.schemas";
 import { auth } from "@/server/auth";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
@@ -44,22 +45,31 @@ export const userRouter = createTRPCRouter({
       });
     }),
   deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
-    const user = await ctx.db.user.findUnique({
-      where: { id: ctx.session.user.id },
-    });
-
-    await stripeApiClient.customers.del(user?.stripeCustomerId ?? "");
-
-    await ctx.db.$transaction([
-      ctx.db.subscription.deleteMany({
-        where: { stripeCustomerId: user?.stripeCustomerId ?? "" },
-      }),
-      ctx.db.user.delete({
+    try {
+      const user = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
-      }),
-    ]);
+      });
 
-    return { message: "Account deleted successfully" };
+      await stripeApiClient.customers.del(user?.stripeCustomerId ?? "");
+
+      await ctx.db.$transaction([
+        ctx.db.subscription.deleteMany({
+          where: { stripeCustomerId: user?.stripeCustomerId ?? "" },
+        }),
+        ctx.db.user.delete({
+          where: { id: ctx.session.user.id },
+        }),
+      ]);
+
+      return { message: "Account deleted successfully" };
+    } catch (error) {
+      console.error(error);
+      throw new TRPCError({
+        message: "Error deleting account",
+        code: "UNPROCESSABLE_CONTENT",
+        cause: error,
+      });
+    }
   }),
   revokeSession: protectedProcedure
     .input(z.object({ token: z.string() }))

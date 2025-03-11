@@ -1,18 +1,17 @@
-import { NextResponse, type NextRequest } from "next/server";
-
 import {
   apiAuthPrefix,
   APP_ROUTES,
   authRoutes,
   publicRoutes,
 } from "@/lib/contants";
-import { getBetterAuthSession } from "@/server/auth";
+import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse, type NextRequest } from "next/server";
 
 export default async function authMiddleware(request: NextRequest) {
   const nextUrl = request.nextUrl;
-  const { data: session } = await getBetterAuthSession(request);
+  const sessionCookie = getSessionCookie(request);
 
-  const isLoggedIn = !!session;
+  const isLoggedIn = !!sessionCookie;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
