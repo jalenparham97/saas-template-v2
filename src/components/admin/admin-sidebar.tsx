@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { AdminNav } from "@/components/admin/admin-nav";
-import { NavHeader } from "@/components/nav-header";
+import { AdminNavHeader } from "@/components/admin/admin-nav-header";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -18,7 +18,7 @@ export function AdminSidebar({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <NavHeader href="/admin" />
+        <AdminNavHeader />
       </SidebarHeader>
       <SidebarContent>
         <AdminNav />
