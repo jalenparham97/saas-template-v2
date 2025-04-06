@@ -137,20 +137,20 @@ export function ImageUploader({
           <Tabs className="w-full" defaultValue="upload">
             <TabsList className="space-x-0">
               <TabsTrigger
-                className="rounded-tl-lg bg-white px-2 py-2 hover:bg-gray-100 [&>*]:hover:text-gray-900"
+                className="rounded-tl-lg bg-white px-2 py-2 hover:bg-gray-100 hover:*:text-gray-900"
                 value="upload"
               >
                 Upload
               </TabsTrigger>
               <TabsTrigger
-                className="bg-white px-2 py-2 hover:bg-gray-100 [&>*]:hover:text-gray-900"
+                className="bg-white px-2 py-2 hover:bg-gray-100 hover:*:text-gray-900"
                 value="link"
               >
                 Link
               </TabsTrigger>
               {showUnsplash && (
                 <TabsTrigger
-                  className="bg-white px-2 py-2 hover:bg-gray-100 [&>*]:hover:text-gray-900"
+                  className="bg-white px-2 py-2 hover:bg-gray-100 hover:*:text-gray-900"
                   value="unsplash"
                 >
                   Unsplash
@@ -162,7 +162,7 @@ export function ImageUploader({
                 <div className="relative mb-4 rounded-md bg-red-50 p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <IconExclamationCircle
                           className="h-5 w-5 text-red-400"
                           aria-hidden="true"

@@ -1,6 +1,5 @@
 import * as React from "react";
 
-import { nanoid } from "@/lib/nanoid";
 import { cn } from "@/lib/utils";
 
 export interface InputProps
@@ -44,7 +43,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={id}
             className={cn(
-              "block text-sm font-medium leading-6",
+              "block text-sm leading-6 font-medium",
               classNames?.label,
             )}
             style={styles?.label}
@@ -66,8 +65,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               id={id}
               type={type}
               className={cn(
-                "block w-full rounded-lg border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm sm:leading-6",
-                error && "ring-red-500 focus:!ring-red-500",
+                "focus:ring-primary focus-visible:ring-primary block w-full rounded-lg border-0 py-1.5 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm sm:leading-6",
+                error && "ring-red-500 focus:ring-red-500!",
                 icon && "pl-9",
                 className,
               )}
@@ -79,8 +78,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               id={id}
               type={type}
               className={cn(
-                "block w-full rounded-lg border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm sm:leading-6",
-                error && "ring-red-500 focus:!ring-red-500",
+                "focus:ring-primary focus-visible:ring-primary block w-full rounded-lg border-0 py-1.5 shadow-xs ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm sm:leading-6",
+                error && "ring-red-500 focus:ring-red-500!",
                 icon && "pl-9",
                 className,
               )}
