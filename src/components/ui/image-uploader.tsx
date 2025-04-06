@@ -53,7 +53,7 @@ export function ImageUploader({
     handleSubmit,
     formState: { isSubmitting },
     reset,
-  } = useForm<{ url: string }>({
+  } = useForm({
     resolver: zodResolver(schema),
   });
 
@@ -179,7 +179,7 @@ export function ImageUploader({
                     </div>
                   </div>
 
-                  <div className="absolute right-1 top-1">
+                  <div className="absolute top-1 right-1">
                     <Button
                       size="icon"
                       variant="ghost"
@@ -249,7 +249,7 @@ export function ImageUploader({
           </Tabs>
         </div>
 
-        <div className="absolute right-1 top-[4px]">
+        <div className="absolute top-[4px] right-1">
           {/* <Button
           compact
           variant="default"

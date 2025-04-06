@@ -53,7 +53,7 @@ export function ResetPasswordForm({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({
+  } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       password: "",

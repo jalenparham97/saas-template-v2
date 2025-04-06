@@ -32,7 +32,7 @@ export function ChangeEmailDialog({ submit, onClose, open }: Props) {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<FormData>({
+  } = useForm({
     resolver: zodResolver(schema),
   });
 

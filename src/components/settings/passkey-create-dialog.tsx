@@ -30,7 +30,7 @@ export function PasskeyCreateDialog({ onClose, open }: Props) {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<{ name: string }>({
+  } = useForm({
     resolver: zodResolver(schema),
   });
 
