@@ -7,17 +7,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ImageUploader } from "@/components/ui/image-uploader";
 import { Input } from "@/components/ui/input";
 import { Loader } from "@/components/ui/loader";
 import { Separator } from "@/components/ui/separator";
+import { UploadButton } from "@/components/ui/upload-button";
 import { env } from "@/env";
 import { useDialog } from "@/hooks/use-dialog";
-import { nanoid } from "@/lib/nanoid";
-import {
-  useFileDeleteMutation,
-  useFileUploadUrlMutation,
-} from "@/queries/storage.queries";
+import { useFileDeleteMutation } from "@/queries/storage.queries";
 import {
   useChangeEmailMutation,
   useUser,
@@ -25,8 +21,11 @@ import {
 } from "@/queries/user.queries";
 import { UserUpdateSchema } from "@/schemas/user.schemas";
 import { type UserUpdateInput } from "@/types/user.types";
+import { IMAGE_MIME_TYPE } from "@/types/utility.types";
+import { createImageUploadUrl } from "@/utils/create-image-upload-url";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { IconPhoto, IconTrash, IconX } from "@tabler/icons-react";
+import { IconExclamationCircle, IconTrash, IconX } from "@tabler/icons-react";
+import { useUploadFile } from "better-upload/client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -34,22 +33,31 @@ interface Props {
   searchParams: Record<string, string | string[] | undefined>;
 }
 
-export function SettingsGeneralView({ searchParams }: Props) {
-  const [logoUploaderOpen, logoUploaderHandler] = useDialog();
+const isDefaultImage = (image: string | null | undefined) =>
+  image?.startsWith("https://ui-avatars.com");
+
+export function AccountGeneralView({ searchParams }: Props) {
   const [deleteAccountModal, deleteAccountModalHandler] = useDialog();
   const [changeEmailModal, changeEmailModalHandler] = useDialog();
+  const [uploadError, setUploadError] = useState("");
   const [showEmailSent, setShowEmailSent] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [emailError, setEmailError] = useState(
     (searchParams?.error as string) || "",
   );
-  const { register, handleSubmit } = useForm<UserUpdateInput>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(UserUpdateSchema),
   });
 
   const user = useUser();
 
-  const uploadUrlMutation = useFileUploadUrlMutation();
+  const { control } = useUploadFile({
+    route: "accountLogoUpload",
+  });
   const deleteFileMutation = useFileDeleteMutation();
   const userUpdateMutation = useUserUpdateMutation({ showToast: true });
   const changeEmailMutation = useChangeEmailMutation({
@@ -69,9 +77,9 @@ export function SettingsGeneralView({ searchParams }: Props) {
   ) => {
     if (!userImage) return;
 
-    if (!userImage.startsWith(env.NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL)) return;
+    if (!userImage.startsWith(env.NEXT_PUBLIC_S3_PUBLIC_BUCKET_URL)) return;
 
-    const fileKey = userImage.split("/").pop()!;
+    const fileKey = `users/${user?.data?.id}/${userImage.split("/").pop()!}`;
 
     try {
       return await deleteFileMutation.mutateAsync({ fileKey });
@@ -80,30 +88,16 @@ export function SettingsGeneralView({ searchParams }: Props) {
     }
   };
 
-  const onFileUpload = async (file: File) => {
-    await deleteCurrentUserImage(user?.data?.image);
-
-    const fileKey = `${user?.data?.id}-${nanoid()}-${file.name}`;
-    const { uploadUrl } = await uploadUrlMutation.mutateAsync({
-      fileKey,
+  const updateUserImage = async (fileKey: string) => {
+    return await userUpdateMutation.mutateAsync({
+      image: createImageUploadUrl(fileKey),
     });
-    if (uploadUrl) {
-      await fetch(uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": "multiport/formdata" },
-        body: file,
-      });
-      await userUpdateMutation.mutateAsync({
-        image: `${env.NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL}/${fileKey}`,
-      });
-    }
   };
 
-  const onUrlUpload = async (url: string) => {
-    await deleteCurrentUserImage(user?.data?.image);
-
+  const removeUserImage = async () => {
+    await deleteCurrentUserImage(user.data?.image);
     await userUpdateMutation.mutateAsync({
-      image: url,
+      image: "",
     });
   };
 
@@ -124,8 +118,8 @@ export function SettingsGeneralView({ searchParams }: Props) {
         <div>
           <SettingsSection>
             <div>
-              <h2 className="text-base font-semibold leading-7">Profile</h2>
-              <p className="mt-1 text-sm leading-6 text-gray-500">
+              <h2 className="text-base leading-7 font-semibold">Profile</h2>
+              <p className="mt-1 text-[15px] leading-6 text-gray-500">
                 Set your name and contact information, the email address entered
                 here is used for your login access.
               </p>
@@ -133,41 +127,141 @@ export function SettingsGeneralView({ searchParams }: Props) {
 
             <Card className="md:col-span-2">
               <div className="flex items-center justify-between border-b border-gray-200 bg-sidebar px-6 py-4">
-                <p className="text-base font-medium leading-6">Your profile</p>
+                <p className="text-base leading-6 font-medium">Your profile</p>
               </div>
 
+              {uploadError && (
+                // TODO: make this a component
+                <div className="relative mb-4 rounded-md bg-red-50 p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex">
+                      <div className="shrink-0">
+                        <IconExclamationCircle
+                          className="h-5 w-5 text-red-400"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">
+                          Error
+                        </h3>
+                        <div className="mt-2 text-sm text-red-700">
+                          <p>{uploadError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="absolute top-1 right-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-red-500 hover:bg-red-100 hover:text-red-500"
+                      onClick={() => setUploadError("")}
+                    >
+                      <IconX size={16} />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <form className="p-6">
-                <div className="grid grid-cols-1 gap-x-4 gap-y-6 sm:max-w-xl sm:grid-cols-6">
+                <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:max-w-xl sm:grid-cols-6">
                   <div className="col-span-full flex items-center gap-x-8">
                     <Avatar className="h-24 w-24 flex-none rounded-lg object-cover">
                       <AvatarImage src={user?.data?.image ?? ""} />
-                      <AvatarFallback className="rounded-none bg-gray-200 uppercase">
-                        <IconPhoto size={40} />
+                      <AvatarFallback className="text-2xl">
+                        {user?.data?.name?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={logoUploaderHandler.open}
-                      >
-                        Change image
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <UploadButton
+                          control={control}
+                          accept={IMAGE_MIME_TYPE.join(",")}
+                          variant="outline"
+                          text="Change image"
+                          uploadOverride={async (file, metadata) => {
+                            console.log("Metadata: ", metadata);
+                            // delete the old user image
+                            await deleteCurrentUserImage(user?.data?.image);
+
+                            // rename the file
+                            const renamedFile = new File(
+                              [file],
+                              `${user?.data?.id}-${file.name}`,
+                              {
+                                type: file.type,
+                              },
+                            );
+
+                            // upload the new file
+                            const result = await control.upload(
+                              renamedFile,
+                              metadata,
+                            );
+
+                            // update the user image
+                            await updateUserImage(result.file.objectKey);
+                          }}
+
+                          // onBeforeUpload={async ({ file }) => {
+                          //   // delete the old user image
+                          //   await deleteCurrentUserImage(user?.data?.image);
+
+                          //   // rename the file
+                          //   return new File(
+                          //     [file],
+                          //     `${user?.data?.id}-${file.name}`,
+                          //     {
+                          //       type: file.type,
+                          //     },
+                          //   );
+                          // }}
+                          // onUploadComplete={async ({ file }) => {
+                          //   await updateUserImage(file.objectKey);
+                          // }}
+                          // onUploadError={(error) => {
+                          //   if (error.message) {
+                          //     setUploadError(error.message);
+                          //   }
+                          // }}
+                        />
+                        {user?.data?.image &&
+                          !isDefaultImage(user?.data?.image) && (
+                            <Button
+                              variant="outline"
+                              type="button"
+                              leftIcon={
+                                <IconTrash size={16} className="text-red-500" />
+                              }
+                              onClick={removeUserImage}
+                              loading={
+                                deleteFileMutation.isPending ||
+                                userUpdateMutation.isPending
+                              }
+                            >
+                              Remove
+                            </Button>
+                          )}
+                      </div>
                       <p className="mt-2 text-xs leading-5 text-gray-400">
-                        JPG, GIF or PNG. 1MB max.
+                        JPG, PNG or WEBP. 1MB max.
                       </p>
                     </div>
                   </div>
 
                   <div className="sm:col-span-full">
                     <Input
-                      label="Full name"
-                      autoComplete="given-name"
+                      label="Name"
+                      autoComplete="name"
+                      type="text"
                       {...register("name")}
+                      error={errors.name !== undefined}
+                      errorMessage={errors?.name?.message}
                       defaultValue={user?.data?.name ?? ""}
                     />
                   </div>
-
                   <div className="sm:col-span-full">
                     <Input
                       label="Email address"
@@ -202,7 +296,7 @@ export function SettingsGeneralView({ searchParams }: Props) {
                         <Button
                           size="icon"
                           type="button"
-                          className="absolute right-1 top-1 h-8 w-8"
+                          className="absolute top-1 right-1 h-8 w-8"
                           variant="ghost"
                           onClick={() => setShowEmailSent(false)}
                         >
@@ -229,17 +323,17 @@ export function SettingsGeneralView({ searchParams }: Props) {
 
           <SettingsSection>
             <div>
-              <h2 className="text-base font-semibold leading-7 text-red-600">
+              <h2 className="text-base leading-7 font-semibold text-red-600">
                 Danger Zone
               </h2>
-              <p className="mt-1 text-sm leading-6 text-gray-500">
+              <p className="mt-1 text-[15px] leading-6 text-gray-500">
                 Be careful, some of these actions are not reversible.
               </p>
             </div>
 
             <Card className="divide-y divide-gray-200 md:col-span-2">
               <div className="flex items-center justify-between bg-sidebar px-6 py-4">
-                <p className="text-base font-medium leading-6">
+                <p className="text-base leading-6 font-medium">
                   Delete your account
                 </p>
               </div>
@@ -265,15 +359,6 @@ export function SettingsGeneralView({ searchParams }: Props) {
           </SettingsSection>
         </div>
       )}
-
-      <ImageUploader
-        open={logoUploaderOpen}
-        onClose={logoUploaderHandler.close}
-        submit={onUrlUpload}
-        onUpload={onFileUpload}
-        showUnsplash={false}
-        maxFileSize={1000000}
-      />
 
       <AccountDeleteDialog
         open={deleteAccountModal}

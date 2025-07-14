@@ -18,10 +18,15 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string(),
     GITHUB_CLIENT_ID: z.string(),
     GITHUB_CLIENT_SECRET: z.string(),
-    R2_BUCKET_NAME: z.string(),
-    R2_ACCOUNT_ID: z.string(),
-    R2_ACCESS_KEY_ID: z.string(),
-    R2_SECRET_ACCESS_KEY: z.string(),
+    // R2_BUCKET_NAME: z.string(),
+    // R2_ACCOUNT_ID: z.string(),
+    // R2_ACCESS_KEY_ID: z.string(),
+    // R2_SECRET_ACCESS_KEY: z.string(),
+    S3_BUCKET_NAME: z.string(),
+    S3_ACCOUNT_ID: z.string(),
+    S3_ACCESS_KEY_ID: z.string(),
+    S3_ENDPOINT_URL: z.string(),
+    S3_SECRET_ACCESS_KEY: z.string(),
     RESEND_API_KEY: z.string(),
     STRIPE_SECRET_KEY: z.string(),
     STRIPE_WEBHOOK_SECRET: z.string(),
@@ -35,7 +40,8 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_APP_BASE_URL: z.string(),
-    NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL: z.string(),
+    // NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL: z.string(),
+    NEXT_PUBLIC_S3_PUBLIC_BUCKET_URL: z.string(),
   },
 
   /**
@@ -53,18 +59,25 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
-    R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
-    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
-    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
-    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    // R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
+    // R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
+    // R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    // R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
+    S3_ACCOUNT_ID: process.env.S3_ACCOUNT_ID,
+    S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
+    S3_ENDPOINT_URL: process.env.S3_ENDPOINT_URL,
+    S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
 
     // Client vars
     NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
-    NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL:
-      process.env.NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL,
+    // NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL:
+    //   process.env.NEXT_PUBLIC_R2_PUBLIC_BUCKET_URL,
+    NEXT_PUBLIC_S3_PUBLIC_BUCKET_URL:
+      process.env.NEXT_PUBLIC_S3_PUBLIC_BUCKET_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { User } from "better-auth";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,12 +20,43 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { env } from "@/env";
 import { authClient, signInWithProvider } from "@/lib/auth-client";
-import { APP_ROUTES } from "@/lib/contants";
+import { APP_NAME, APP_ROUTES } from "@/lib/contants";
+import { nanoid } from "@/lib/nanoid";
 import { cn } from "@/lib/utils";
+import { useUserUpdateMutation } from "@/queries/user.queries";
 import { SignupSchema } from "@/schemas/auth.schemas";
 import { type SignupFormData } from "@/types/auth.types";
+
+/**
+ * Asynchronously generates an avatar image for a user by sending a POST request to the avatar API.
+ *
+ * @param seed - A string used to seed the avatar generation process.
+ * @param uniqueIdentifier - The unique identifier of the user for whom the avatar is being generated.
+ * @returns A promise that resolves to the URL of the generated avatar image.
+ * @throws Will throw an error if the upload fails or the response is not OK.
+ */
+export const createAvatarImage = async (
+  seed: string,
+  uniqueIdentifier: string,
+) => {
+  const res = await fetch(`${env.NEXT_PUBLIC_APP_BASE_URL}/api/avatar`, {
+    method: "POST",
+    body: JSON.stringify({
+      seed,
+      key: `users/${uniqueIdentifier}/${nanoid(10)}.svg`,
+    }),
+  });
+  // Check if the upload was successful
+  if (!res.ok) {
+    throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
+  }
+  // // Get the image URL from the response
+  const response = await res.json();
+  // Return the image URL
+  return response.url as string;
+};
 
 export function SignupForm({
   className,
@@ -46,6 +78,8 @@ export function SignupForm({
     },
   });
 
+  const updateUserMutation = useUserUpdateMutation();
+
   async function onSubmit(data: SignupFormData) {
     setErrorMessage("");
     await authClient.signUp.email({
@@ -54,7 +88,14 @@ export function SignupForm({
       password: data.password,
       callbackURL: APP_ROUTES.DASHBOARD,
       fetchOptions: {
-        onSuccess: (ctx) => {
+        onSuccess: async (ctx) => {
+          const user = ctx.data.user as User;
+          // Generate the user image
+          const userImage = await createAvatarImage(data.name, user.id);
+          // Update the user image in the database
+          await updateUserMutation.mutateAsync({
+            image: userImage,
+          });
           router.push(APP_ROUTES.DASHBOARD);
         },
         onError: (ctx) => {
@@ -76,9 +117,9 @@ export function SignupForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="p-6">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Sign up for Acme Inc.</CardTitle>
+          <CardTitle className="text-xl">Sign up for {APP_NAME}</CardTitle>
           <CardDescription>
-            Get started with your free account and unlimited snippets.
+            Get started with your free account today.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -122,8 +163,8 @@ export function SignupForm({
                 </Button>
               </div>
 
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="bg-background text-muted-foreground relative z-10 px-2">
+              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+                <span className="relative z-10 bg-background px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
@@ -174,7 +215,7 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
-      <div className="text-muted-foreground hover:[&_a]:text-primary text-center text-xs text-balance [&_a]:underline [&_a]:underline-offset-4">
+      <div className="text-center text-xs text-balance text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </div>
