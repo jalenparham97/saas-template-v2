@@ -1,8 +1,8 @@
+import { auth } from "@/lib/auth";
 import { APP_ROUTES } from "@/lib/contants";
 import { stripeApiClient } from "@/lib/stripe";
 import { z } from "@/lib/zod";
 import { UserUpdateSchema } from "@/schemas/user.schemas";
-import { auth } from "@/server/auth";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 

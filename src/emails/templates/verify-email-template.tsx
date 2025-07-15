@@ -13,13 +13,6 @@ import {
 import * as React from "react";
 import { FooterCenter } from "../components/footer";
 import { Header } from "../components/header";
-import {
-  button,
-  container,
-  h1,
-  text,
-  wrapper,
-} from "../components/sharedStyles";
 
 interface VerifyEmailProps {
   email?: string;
@@ -34,30 +27,51 @@ const VerifyEmailTemplate = ({
     <Html>
       <Head />
       <Tailwind>
-        <Body style={wrapper}>
-          <Container style={wrapper}>
-            <Container style={container}>
+        <Body style={{ backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+          <Container style={{ backgroundColor: '#ffffff', margin: '0 auto', padding: '0', maxWidth: '600px' }}>
+            <Container style={{ backgroundColor: '#ffffff', padding: '0' }}>
               <Header />
-              <Section className="px-6 py-10">
-                <Heading style={{ ...h1 }}>Verify your email address</Heading>
-                <Text style={text} className="py-2">
-                  Hi, <strong className="text-black">{email}</strong>,
+              <Section className="px-8 py-12">
+                <Heading className="text-black text-3xl font-bold leading-tight mb-8 text-left">
+                  Verify your email address
+                </Heading>
+                <Text className="text-black text-base leading-relaxed mb-4">
+                  Hi <strong className="text-black">{email}</strong>,
                 </Text>
-                <Text style={text} className="pb-4">
+                <Text className="text-black text-base leading-relaxed mb-8">
                   We received a request to verify your email address. To
                   complete the verification process, please click the button
                   below.
                 </Text>
-                <Button style={button} href={link}>
-                  Verify email address
-                </Button>
+                <div className="my-10">
+                  <Button 
+                    className="bg-black text-white px-8 py-4 text-base font-semibold rounded-lg no-underline inline-block border-none"
+                    href={link}
+                  >
+                    Verify email address
+                  </Button>
+                </div>
 
-                <Text style={text} className="pt-4">
+                <Text className="text-gray-600 text-sm leading-relaxed mb-2">
                   Or copy and paste this URL into a new tab of your browser:
                 </Text>
-                <Text className="max-w-[500px] break-words text-sm text-black">
-                  <Link href={link} className="text-blue-600 no-underline">
+                <div className="bg-gray-50 border rounded-lg p-4 mb-6">
+                  <p className="text-blue-500 text-sm font-mono break-all hover:underline m-0">
                     {link}
+                  </p>
+                </div>
+
+                <Text className="text-gray-600 text-sm leading-relaxed mt-8 mb-4">
+                  If you didn&apos;t request this action, you can safely ignore
+                  this email and no changes will be made to your account.
+                </Text>
+                <Text className="text-gray-600 text-sm leading-relaxed mt-4">
+                  Have questions? We&apos;re here to help.{" "}
+                  <Link
+                    href={`mailto:support@saas-template.com`}
+                    className="text-black underline"
+                  >
+                    Contact our support team
                   </Link>
                 </Text>
               </Section>
