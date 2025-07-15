@@ -57,12 +57,12 @@ export async function deleteFile(fileKey: string) {
  * @param buffer - The file content as a Buffer
  * @returns Promise<PutObjectCommandOutput> The response from the upload operation
  */
-export async function uploadFile(fileKey: string, buffer: Buffer) {
+export async function uploadFile(fileKey: string, buffer: Buffer, fileType?: string) {
   const uploadParams = {
     Bucket: env.S3_BUCKET_NAME,
     Key: fileKey,
     Body: buffer,
-    ContentType: "image/svg+xml",
+    ContentType: fileType ?? "application/octet-stream",
   };
 
   return await s3Client.send(new PutObjectCommand(uploadParams));

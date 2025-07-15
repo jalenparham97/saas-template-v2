@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { UploadButton } from "@/components/ui/upload-button";
 import { env } from "@/env";
 import { useDialog } from "@/hooks/use-dialog";
+import { nanoid } from '@/lib/nanoid';
 import { useFileDeleteMutation } from "@/queries/storage.queries";
 import {
   useChangeEmailMutation,
@@ -36,7 +37,7 @@ interface Props {
 const isDefaultImage = (image: string | null | undefined) =>
   image?.startsWith("https://ui-avatars.com");
 
-export function AccountGeneralView({ searchParams }: Props) {
+export function SettingsGeneralView({ searchParams }: Props) {
   const [deleteAccountModal, deleteAccountModalHandler] = useDialog();
   const [changeEmailModal, changeEmailModalHandler] = useDialog();
   const [uploadError, setUploadError] = useState("");
@@ -79,7 +80,9 @@ export function AccountGeneralView({ searchParams }: Props) {
 
     if (!userImage.startsWith(env.NEXT_PUBLIC_S3_PUBLIC_BUCKET_URL)) return;
 
-    const fileKey = `users/${user?.data?.id}/${userImage.split("/").pop()!}`;
+    const fileKey = userImage.split(`${env.NEXT_PUBLIC_S3_PUBLIC_BUCKET_URL}/`)
+      .pop()!;
+      console.log("File key: ", fileKey);
 
     try {
       return await deleteFileMutation.mutateAsync({ fileKey });
@@ -181,25 +184,21 @@ export function AccountGeneralView({ searchParams }: Props) {
                           accept={IMAGE_MIME_TYPE.join(",")}
                           variant="outline"
                           text="Change image"
-                          uploadOverride={async (file, metadata) => {
-                            console.log("Metadata: ", metadata);
+                          uploadOverride={async (file) => {
                             // delete the old user image
-                            await deleteCurrentUserImage(user?.data?.image);
+                            // await deleteCurrentUserImage(user?.data?.image);
 
                             // rename the file
                             const renamedFile = new File(
                               [file],
-                              `${user?.data?.id}-${file.name}`,
+                              `${nanoid()}-${file.name}`,
                               {
                                 type: file.type,
                               },
                             );
 
                             // upload the new file
-                            const result = await control.upload(
-                              renamedFile,
-                              metadata,
-                            );
+                            const result = await control.upload(renamedFile);
 
                             // update the user image
                             await updateUserImage(result.file.objectKey);

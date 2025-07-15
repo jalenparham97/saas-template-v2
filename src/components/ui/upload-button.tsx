@@ -55,12 +55,12 @@ export function UploadButton({
       </label>
       {isPending ? (
         <>
-          <Loader2 className="size-4 animate-spin" />
+          <Loader2 className="size-4 animate-spin mr-2" />
           {text}
         </>
       ) : (
         <>
-          <Upload className="size-4" />
+          <Upload className="size-4 mr-2" />
           {text}
         </>
       )}

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const imageBuffer = generateAvatarImage(seed);
-    await uploadFile(key, imageBuffer);
+    await uploadFile(key, imageBuffer, "image/svg+xml");
     const url = createImageUploadUrl(key);
     return NextResponse.json({ url }, { status: 201 });
   } catch (error) {
