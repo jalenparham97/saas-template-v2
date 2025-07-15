@@ -1,7 +1,6 @@
 "use client";
 
-import { PageTitle } from "@/components/ui/page-title";
-import { PageWrapper } from "@/components/ui/page-wrapper";
+import { PageTitle, PageWrapper } from "@/components/ui/page-structure";
 
 export function DashboardView() {
   return (
