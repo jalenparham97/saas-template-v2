@@ -27,45 +27,58 @@ const VerifyEmailTemplate = ({
     <Html>
       <Head />
       <Tailwind>
-        <Body style={{ backgroundColor: '#ffffff', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-          <Container style={{ backgroundColor: '#ffffff', margin: '0 auto', padding: '0', maxWidth: '600px' }}>
-            <Container style={{ backgroundColor: '#ffffff', padding: '0' }}>
+        <Body
+          style={{
+            backgroundColor: "#ffffff",
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          }}
+        >
+          <Container
+            style={{
+              backgroundColor: "#ffffff",
+              margin: "0 auto",
+              padding: "0",
+              maxWidth: "600px",
+            }}
+          >
+            <Container style={{ backgroundColor: "#ffffff", padding: "0" }}>
               <Header />
               <Section className="px-8 py-12">
-                <Heading className="text-black text-3xl font-bold leading-tight mb-8 text-left">
+                <Heading className="mb-8 text-left text-3xl leading-tight font-bold text-black">
                   Verify your email address
                 </Heading>
-                <Text className="text-black text-base leading-relaxed mb-4">
+                <Text className="mb-4 text-base leading-relaxed text-black">
                   Hi <strong className="text-black">{email}</strong>,
                 </Text>
-                <Text className="text-black text-base leading-relaxed mb-8">
+                <Text className="mb-8 text-base leading-relaxed text-black">
                   We received a request to verify your email address. To
                   complete the verification process, please click the button
                   below.
                 </Text>
                 <div className="my-10">
-                  <Button 
-                    className="bg-black text-white px-8 py-4 text-base font-semibold rounded-lg no-underline inline-block border-none"
+                  <Button
+                    className="inline-block rounded-lg border-none bg-black px-8 py-4 text-base font-semibold text-white no-underline"
                     href={link}
                   >
                     Verify email address
                   </Button>
                 </div>
 
-                <Text className="text-gray-600 text-sm leading-relaxed mb-2">
+                <Text className="mb-2 text-sm leading-relaxed text-gray-600">
                   Or copy and paste this URL into a new tab of your browser:
                 </Text>
-                <div className="bg-gray-50 border rounded-lg p-4 mb-6">
-                  <p className="text-blue-500 text-sm font-mono break-all hover:underline m-0">
+                <div className="mb-6 rounded-lg border bg-gray-50 p-4">
+                  <p className="m-0 font-mono text-sm break-all text-blue-500 hover:underline">
                     {link}
                   </p>
                 </div>
 
-                <Text className="text-gray-600 text-sm leading-relaxed mt-8 mb-4">
+                <Text className="mt-8 mb-4 text-sm leading-relaxed text-gray-600">
                   If you didn&apos;t request this action, you can safely ignore
                   this email and no changes will be made to your account.
                 </Text>
-                <Text className="text-gray-600 text-sm leading-relaxed mt-4">
+                <Text className="mt-4 text-sm leading-relaxed text-gray-600">
                   Have questions? We&apos;re here to help.{" "}
                   <Link
                     href={`mailto:support@saas-template.com`}
